@@ -4,19 +4,16 @@ import (
 	"hash/fnv"
 )
 
-// doMap manages one map task:
+// Manages one map task:
 // It reads one of the input files (inFile), calls the user-defined map function (mapF) for
 // that file's contents, and partitions the output into nReduce intermediate files.
 func doMap(
-	jobName string, // the name of the MapReduce job
-	mapTaskNumber int, // which map task this is
+	jobName string,
+	mapTaskNumber int,
 	inFile string,
-	nReduce int, // the number of reduce task that will be run ("R" in the paper)
+	nReduce int,
 	mapF func(file string, contents string) []KeyValue,
 ) {
-	//
-	// You will need to write this function.
-	//
 	// The intermediate output of a map task is stored as multiple
 	// files, one per destination reduce task. The file name includes
 	// both the map task number and the reduce task number. Use the

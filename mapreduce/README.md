@@ -4,9 +4,47 @@ This is the implementation of the [`Map-Reduce`](http://nil.csail.mit.edu/6.824/
 
 ## Implementation Details
 
-### Modes of Implementation
+### Modes
 
 - The implementation has support for two modes of operation, `sequential` and `distributed`.
 - In the `sequnetial` mode, the map and reduce tasks are executed one at a time: first, the first map task is executed to completion, then the second, then the third, etc. When all the map tasks have finished, the first reduce task is run, then the second, etc.
 - This mode, while not very fast, is useful for debugging.
-- The `distributed` mode runs many worker threads that first execute map tasks in parallel, and then reduce tasks. This is much faster, but also harder to implement and debug.
+- The `distributed` mode runs many worker threads that first execute map tasks in parallel, and then reduce tasks. T
+- This mode is much faster, but also harder to implement and debug.
+
+### Structure
+
+The `mapreduce` package provides a simple `Map/Reduce` library. Applications should normally call [`Distributed()`](./master.go) to start a job, but may instead call [`Sequential()`](./master.go) to get a sequential execution for debugging.
+
+The code executes a job as follows:
+
+1. The application provides a number of input files, a map function, a reduce function, and the number of reduce tasks (`nReduce`). (Usually the number of reduce tasks in small to provide better chunking).
+2. A `master` is created with this knowledge. It starts an RPC server in [`master_rpc.go`](./master_rpc.go), and waits for workers to register (using the RPC call [`Register()`](./master.go)). As tasks become available (in steps `4` and `5`), [`schedule()](./schedule.go) decides how to assign those tasks to workers, and how to handle worker failures.
+3. The master considers each input file to be one map task, and calls [`doMap()`](./common_map.go) at least once for each map task. It does so either directly (when using `Sequential()`) or by issuing the `DoTask` RPC to a [`worker`](./worker.go). Each call to `doMap()` reads the appropriate file, calls the map function on that file's contents, and writes the resulting key/value pairs to `nReduce` intermediate files. `doMap()` hashes each key to pick the intermediate file and thus the reduce task that will process the key. There will be `nMap` x `nReduce` files after all map tasks are done. Each file name contains a prefix, the map task number, and the reduce task number.
+
+For example, if there are two map tasks and three reduce tasks, the map tasks will create these six intermediate files:
+
+```
+mrtmp.xxx-0-0
+mrtmp.xxx-0-1
+mrtmp.xxx-0-2
+mrtmp.xxx-1-0
+mrtmp.xxx-1-1
+mrtmp.xxx-1-2
+```
+
+4. Each worker must be able to read files written by any other worker, as well as the input files. Real deployments use distributed storage systems such as `GFS` to allow this access even though workers run on different machines. For this example, we will run all the workers on the same machine, and use the local file system.
+
+5. The `master` next calls [`doReduce()`](./common_reduce.go) at least once for each reduce task. As with `doMap()`, it does so either directly or through a worker. The `doReduce()` for reduce task `r` collects the `r`'th intermediate file from each map task, and calls the reduce function for each key that appears in those files. The reduce tasks produce nReduce result files.
+6. The `master` calls [`mr.merge()`](./master_splitmerge.go), which merges all the nReduce files produced by the previous step into a single output.
+7. The `master` sends a Shutdown RPC to each of its workers, and then shuts down its own RPC server.
+
+The runner code is located in the [`main.go`](./main.go) file, and performs the word-count operation using our implementation of `Map Reduce`. It represents the final way we would want our users to interact with the system.
+
+### Implementation
+
+## Testing
+
+For the purpose the implementation, we have download multiple novels from the [`Project Gutenberg`](www.gutennberg.org) and stored them in the [`data`](../data/) folder with the prefix `pg-`. We use the shell script `test-wc.sh` to test the implementation of the word count server.
+
+## Resources

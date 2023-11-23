@@ -1,16 +1,12 @@
 package mapreduce
 
-//
-// Please do not modify this file.
-//
-
 import (
 	"fmt"
 	"net"
 	"sync"
 )
 
-// Master holds all the state that the master needs to keep track of.
+// Holds all the state that the master needs to keep track of
 type Master struct {
 	sync.Mutex
 

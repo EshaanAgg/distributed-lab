@@ -5,9 +5,6 @@ import (
 	"net/rpc"
 )
 
-// What follows are RPC types and methods.
-// Field names must start with capital letters, otherwise RPC will break.
-
 // DoTaskArgs holds the arguments that are passed to a worker when a job is
 // scheduled on it.
 type DoTaskArgs struct {
@@ -47,7 +44,6 @@ type RegisterArgs struct {
 //
 // please use call() to send all RPCs, in master.go, mapreduce.go,
 // and worker.go.  please don't change this function.
-//
 func call(srv string, rpcname string,
 	args interface{}, reply interface{}) bool {
 	c, errx := rpc.Dial("unix", srv)

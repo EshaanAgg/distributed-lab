@@ -1,9 +1,8 @@
 package mapreduce
 
-// doReduce manages one reduce task: it reads the intermediate
-// key/value pairs (produced by the map phase) for this task, sorts the
-// intermediate key/value pairs by key, calls the user-defined reduce function
-// (reduceF) for each key, and writes the output to disk.
+// Manages one reduce task:
+// Reads the intermediate key/value pairs (produced by the map phase), sorts them
+// iby key, calls the user-defined reduce function (`reduceF“) for each key, and writes the output to disk.
 func doReduce(
 	jobName string, // the name of the whole MapReduce job
 	reduceTaskNumber int, // which reduce task this is
