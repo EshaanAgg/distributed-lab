@@ -34,12 +34,12 @@ This repository contains my solutions to the infamous [`MIT 6.824 2017 Course`](
   <tr>
     <td>2</td>
     <td>Single Worker Work Count</td>
-    <td>⏳</td>
+    <td>✅</td>
   </tr>
     <tr>
     <td>3</td>
     <td>Distributing MapReduce tasks</td>
-    <td>🔴</td>
+    <td>⏳</td>
   </tr>
   </tr>
     <td>4</td>

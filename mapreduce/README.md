@@ -51,6 +51,27 @@ The runner code is located in the [`main.go`](./main.go) file, and performs the 
 
 ## Testing
 
-For the purpose the implementation, we have download multiple novels from the [`Project Gutenberg`](www.gutennberg.org) and stored them in the [`data`](../data/) folder with the prefix `pg-`. We use the shell script `test-wc.sh` to test the implementation of the word count server.
+For the purpose the implementation, we have download multiple novels from the [`Project Gutenberg`](www.gutennberg.org) and stored them in the [`data`](../data/) folder with the prefix `pg-`. Some of the tasks have their own unit-tests, while others need to be checked via a script.
+
+#### Task 1
+
+```bash
+go test -run Sequential
+```
+
+#### Task 2
+
+To test this tasks, you need to run the following commands from `the root of the project`:
+
+```bash
+# Manual testing
+go run main.go mapreduce master sequential data/pg-*.txt
+
+# Getting the most frequent words
+sort -n -k2 tmp/mrtmp.wcseq | tail -10`
+
+# Getting via bash script
+./test/test-wc.sh`
+```
 
 ## Resources
