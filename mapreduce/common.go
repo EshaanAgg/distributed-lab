@@ -2,15 +2,11 @@ package mapreduce
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"path/filepath"
 	"strconv"
 )
 
-// Set if the debugging is enabled or not
 const debugEnabled = false
-
 const resultsDirectory = "tmp"
 
 // Prints the result only if `debugEnabled` is true
@@ -45,16 +41,6 @@ func mergeName(jobName string, reduceTask int) string {
 	fileName := "mrtmp." + jobName + "-res-" + strconv.Itoa(reduceTask)
 	return getFilePath(fileName)
 
-}
-
-// Checks if the intermediate result directory exists and creates the same if it doesn't
-func makeMapResultDirectory() {
-	if _, err := os.Stat(resultsDirectory); os.IsNotExist(err) {
-		err := os.Mkdir(resultsDirectory, 0777)
-		if err != nil {
-			log.Fatalf("doMap can't create intermediate result directory `%s` which is needed to store the map results: %v", resultsDirectory, err)
-		}
-	}
 }
 
 func getFilePath(name string) string {

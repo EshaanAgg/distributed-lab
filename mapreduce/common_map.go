@@ -32,7 +32,6 @@ func doMap(
 		reduceTaskMaps[reduceTask] = append(reduceTaskMaps[reduceTask], kv)
 	}
 
-	makeMapResultDirectory()
 	for reduceTask, kv := range reduceTaskMaps {
 		writeMapResultToDisk(jobName, mapTaskNumber, reduceTask, kv)
 	}

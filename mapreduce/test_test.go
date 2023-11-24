@@ -11,6 +11,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/eshaanagg/distributed/utils"
 )
 
 const (
@@ -41,44 +43,49 @@ func ReduceFunc(key string, values []string) string {
 // Checks input file agaist output file
 // Each input number should show up in the output file in string sorted order
 func check(t *testing.T, files []string) {
-	output, err := os.Open("mrtmp.test")
+	output, err := os.Open(getFilePath("mrtmp.test"))
 	if err != nil {
-		log.Fatalf("check call failed: %v", err)
+		log.Fatalf("check call failed to open the result file: %v", err)
 	}
 	defer output.Close()
 
-	var lines []string
+	// Read all the lines in the input files and store them in a slice
+	lines := make([]string, 0)
 	for _, f := range files {
 		input, err := os.Open(f)
 		if err != nil {
-			log.Fatal("check: ", err)
+			log.Fatalf("check call failed to open the input file %s: %v", f, err)
 		}
 		defer input.Close()
+
 		inputScanner := bufio.NewScanner(input)
 		for inputScanner.Scan() {
 			lines = append(lines, inputScanner.Text())
 		}
 	}
-
 	sort.Strings(lines)
 
+	// Compare the result file with the input file and fail the test if they don't match
 	outputScanner := bufio.NewScanner(output)
 	i := 0
 	for outputScanner.Scan() {
 		var v1 int
 		var v2 int
 		text := outputScanner.Text()
+
 		n, err := fmt.Sscanf(lines[i], "%d", &v1)
 		if n == 1 && err == nil {
-			n, err = fmt.Sscanf(text, "%d", &v2)
+			_, err = fmt.Sscanf(text, "%d", &v2)
 		}
+
 		if err != nil || v1 != v2 {
-			t.Fatalf("line %d: %d != %d err %v\n", i, v1, v2, err)
+			t.Fatalf("line %d: %d != %d | err: %v\n", i, v1, v2, err)
 		}
 		i++
 	}
+
 	if i != nNumber {
-		t.Fatalf("Expected %d lines in output\n", nNumber)
+		t.Fatalf("Expected %d lines in output but had only %d lines\n", nNumber, i)
 	}
 }
 
@@ -105,7 +112,7 @@ func makeInputs(num int) []string {
 
 		file, err := os.Create(names[f])
 		if err != nil {
-			log.Fatalf("[Testing Error] Can't make the input file %s: %v", names[f], err)
+			log.Fatalf("Can't make the input file %s: %v", names[f], err)
 		}
 
 		w := bufio.NewWriter(file)
@@ -148,6 +155,11 @@ func cleanup(mr *Master) {
 }
 
 func TestSequentialSingle(t *testing.T) {
+	err := utils.EmptyDirectory(resultsDirectory)
+	if err != nil {
+		t.Errorf("Failed as the results directory couldn't be cleaned: %v", err)
+	}
+
 	mr := Sequential("test", makeInputs(1), 1, MapFunc, ReduceFunc)
 	mr.Wait()
 	check(t, mr.files)
