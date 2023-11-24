@@ -12,18 +12,16 @@ This repository contains my solutions to the infamous [`MIT 6.824 2017 Course`](
 
 <table>
   <tr>
-    <th>Lab</th>
+    <th colspan="2">Lab</th>
     <th>Task ID</th>
     <th>Task Description</th>
     <th>Status</th>
   </tr>
 
   <tr>
+  <th rowspan="5">1</td>
     <th rowspan="5">
         <a href="./mapreduce/README.md">
-            Lab 1 
-            <br>
-            <br>
             Map Reduce Algorithm 
         </a>
     </th>
@@ -49,18 +47,17 @@ This repository contains my solutions to the infamous [`MIT 6.824 2017 Course`](
   </tr>
     <td>5</td>
     <td>Inverted Index Generation (Optional)</td>
-    <td>⏳</td>
+    <td>✅</td>
   </tr>
 
   <tr>
-  <th colspan="3">
+    <th rowspan="1">2</td>
+    <th rowspan="1" colspan="3">
         <a href="">
-            Lab 2
-            <br>
-            <br>
-            Raft 
+            RAFT
         </a>
     </th>
-    <td>🔴</td>
+    <td>⏳🔴</td>
   </tr>
+
 </table>

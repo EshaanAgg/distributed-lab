@@ -14,6 +14,8 @@ func main() {
 
 	if os.Args[1] == "mapreduce" {
 		mapreduce.Main(os.Args[2:])
+	} else if os.Args[1] == "ii" {
+		mapreduce.IIMain(os.Args[2:])
 	} else {
 		log.Fatalf("Unknown program suite: %s\n", os.Args[1])
 	}

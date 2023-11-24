@@ -61,17 +61,17 @@ go test -run Sequential
 
 #### Task 2
 
-To test this tasks, you need to run the following commands from `the root of the project`:
+To test this task, you need to run the following commands from the root of the project:
 
 ```bash
 # Manual testing
 go run main.go mapreduce master sequential data/pg-*.txt
 
 # Getting the most frequent words
-sort -n -k2 tmp/mrtmp.wcseq | tail -10`
+sort -n -k2 tmp/mrtmp.wcseq | tail -10
 
-# Getting via bash script
-./test/test-wc.sh`
+# Testing via bash script
+./test/test-wc.sh
 ```
 
 #### Task 3
@@ -86,4 +86,17 @@ go test -run TestBasic
 go test -run Failure
 ```
 
-## Resources
+#### Task 5 (Optional)
+
+To test this task, you need to run the following commands from the root of the project:
+
+```bash
+# Manual testing
+go run main.go ii master sequential data/pg-*.txt
+
+# Getting the words that appeared in most stories
+sort -k1,1 tmp/mrtmp.iiwc | sort -snk2,2 tmp/mrtmp.iiwx | grep -v '16' | tail -10
+
+# Testing via bash script
+./test/test-ii.sh
+```
