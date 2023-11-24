@@ -19,10 +19,7 @@ const (
 	nReduce = 50
 )
 
-// Create input file with N numbers
-// Check if we have N numbers in output file
-
-// Split in words
+// A dummy map function which converts each word in `value` to a KeyValue struct with Key as the word and Value as ""
 func MapFunc(file string, value string) (res []KeyValue) {
 	debug("Map %v\n", value)
 	words := strings.Fields(value)
@@ -33,7 +30,7 @@ func MapFunc(file string, value string) (res []KeyValue) {
 	return
 }
 
-// Just return key
+// Returns a empty string for any number of values
 func ReduceFunc(key string, values []string) string {
 	for _, e := range values {
 		debug("Reduce %s %v\n", key, e)
@@ -41,12 +38,12 @@ func ReduceFunc(key string, values []string) string {
 	return ""
 }
 
-// Checks input file agaist output file: each input number should show up
-// in the output file in string sorted order
+// Checks input file agaist output file
+// Each input number should show up in the output file in string sorted order
 func check(t *testing.T, files []string) {
 	output, err := os.Open("mrtmp.test")
 	if err != nil {
-		log.Fatal("check: ", err)
+		log.Fatalf("check call failed: %v", err)
 	}
 	defer output.Close()
 
@@ -95,16 +92,22 @@ func checkWorker(t *testing.T, l []int) {
 	}
 }
 
-// Make input file
+// Make a sample input file
 func makeInputs(num int) []string {
-	var names []string
-	var i = 0
+	names := make([]string, 0)
+	i := 0
+
 	for f := 0; f < num; f++ {
-		names = append(names, fmt.Sprintf("824-mrinput-%d.txt", f))
+		names = append(
+			names,
+			getFilePath(fmt.Sprintf("mrinput-%d.txt", f)),
+		)
+
 		file, err := os.Create(names[f])
 		if err != nil {
-			log.Fatal("mkInput: ", err)
+			log.Fatalf("[Testing Error] Can't make the input file %s: %v", names[f], err)
 		}
+
 		w := bufio.NewWriter(file)
 		for i < (f+1)*(nNumber/num) {
 			fmt.Fprintf(w, "%d\n", i)
@@ -113,6 +116,7 @@ func makeInputs(num int) []string {
 		w.Flush()
 		file.Close()
 	}
+
 	return names
 }
 
