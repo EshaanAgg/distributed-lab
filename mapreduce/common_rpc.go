@@ -5,47 +5,39 @@ import (
 	"net/rpc"
 )
 
-// DoTaskArgs holds the arguments that are passed to a worker when a job is
-// scheduled on it.
+// Holds the arguments that are passed to a worker when a job is scheduled on it
 type DoTaskArgs struct {
 	JobName    string
-	File       string   // only for map, the input file
-	Phase      jobPhase // are we in mapPhase or reducePhase?
-	TaskNumber int      // this task's index in the current phase
+	File       string   // Stored only for the Map phase; Represents the input file
+	Phase      jobPhase // Shows whether the task is a Map or Reduce task
+	TaskNumber int      // The index of the task in the current phase
 
-	// NumOtherPhase is the total number of tasks in other phase; mappers
-	// need this to compute the number of output bins, and reducers needs
-	// this to know how many input files to collect.
+	// It is the total number of tasks in other phase
+	// mappers use this to compute the number of output bins
+	// reducers use this to know how many input files to collect
 	NumOtherPhase int
 }
 
-// ShutdownReply is the response to a WorkerShutdown.
+// It is the response to a WorkerShutdown.
 // It holds the number of tasks this worker has processed since it was started.
 type ShutdownReply struct {
-	Ntasks int
+	NTasks int
 }
 
-// RegisterArgs is the argument passed when a worker registers with the master.
+// Argument passed when a worker registers with the master
 type RegisterArgs struct {
-	Worker string // the worker's UNIX-domain socket name, i.e. its RPC address
+	Worker string // Worker's UNIX-domain socket name, i.e. its RPC address
 }
 
-// call() sends an RPC to the rpcname handler on server srv
-// with arguments args, waits for the reply, and leaves the
-// reply in reply. the reply argument should be the address
-// of a reply structure.
+// Sends an RPC to the `rpcname` handler on server `srv` with arguments `args`,
+// waits for the reply, and returns the reply in the `reply` struct.
+// The `reply` argument should be the address of a reply structure.
 //
-// call() returns true if the server responded, and false
-// if call() was not able to contact the server. in particular,
-// reply's contents are valid if and only if call() returned true.
+// It returns `true` if the server responded, and `false“ if it wasn't able to contact the server.
+// In particular, reply's contents are valid if and only if `call()` returned true.
 //
-// you should assume that call() will time out and return an
-// error after a while if it doesn't get a reply from the server.
-//
-// please use call() to send all RPCs, in master.go, mapreduce.go,
-// and worker.go.  please don't change this function.
-func call(srv string, rpcname string,
-	args interface{}, reply interface{}) bool {
+// Please use it to send all RPCs. You can assume that the function would timeout after a while if the server doesn't respond.
+func call(srv string, rpcname string, args any, reply any) bool {
 	c, errx := rpc.Dial("unix", srv)
 	if errx != nil {
 		return false
@@ -57,6 +49,6 @@ func call(srv string, rpcname string,
 		return true
 	}
 
-	fmt.Println(err)
+	fmt.Printf("Error in calling the RPC: %v", err)
 	return false
 }

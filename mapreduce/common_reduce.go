@@ -34,7 +34,7 @@ func doReduce(
 			log.Fatalf("doReduce can't decode the contents of the file %v: %v", inFile, err)
 		}
 
-		// For each key-value pair, all the value to the appropiate global state
+		// For each key-value pair, add all the value to the appropiate global state
 		for _, pair := range kv {
 			_, exists := allKeyValues[pair.Key]
 			if !exists {

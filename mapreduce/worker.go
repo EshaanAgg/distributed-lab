@@ -1,9 +1,5 @@
 package mapreduce
 
-//
-// Please do not modify this file.
-//
-
 import (
 	"fmt"
 	"log"
@@ -13,21 +9,20 @@ import (
 	"sync"
 )
 
-// Worker holds the state for a server waiting for DoTask or Shutdown RPCs
+// Holds the state for a server waiting for DoTask or Shutdown RPCs
 type Worker struct {
 	sync.Mutex
 
 	name       string
 	Map        func(string, string) []KeyValue
 	Reduce     func(string, []string) string
-	nRPC       int // quit after this many RPCs; protected by mutex
-	nTasks     int // total tasks executed; protected by mutex
-	concurrent int // number of parallel DoTasks in this worker; mutex
+	nRPC       int // Quit after this many RPCs; Protected by mutex
+	nTasks     int // Total tasks executed; Protected by mutex
+	concurrent int // Number of parallel DoTasks in this worker; mutex
 	l          net.Listener
 }
 
-// DoTask is called by the master when a new task is being scheduled on this
-// worker.
+// Called by the master when a new task is being scheduled on this worker
 func (wk *Worker) DoTask(arg *DoTaskArgs, _ *struct{}) error {
 	fmt.Printf("%s: given %v task #%d on file %s (nios: %d)\n",
 		wk.name, arg.Phase, arg.TaskNumber, arg.File, arg.NumOtherPhase)
@@ -65,7 +60,7 @@ func (wk *Worker) Shutdown(_ *struct{}, res *ShutdownReply) error {
 	debug("Shutdown %s\n", wk.name)
 	wk.Lock()
 	defer wk.Unlock()
-	res.Ntasks = wk.nTasks
+	res.NTasks = wk.nTasks
 	wk.nRPC = 1
 	return nil
 }

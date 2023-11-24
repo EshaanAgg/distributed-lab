@@ -45,12 +45,13 @@ func (mr *Master) merge() {
 	if err != nil {
 		log.Fatalf("Merge: failed to create the final result file: %v", err)
 	}
+	defer file.Close()
+
 	w := bufio.NewWriter(file)
 	for _, k := range allKeyValues {
 		fmt.Fprintf(w, "%s: %s\n", k.Key, k.Value)
 	}
 	w.Flush()
-	file.Close()
 }
 
 // A simple wrapper around `os.Remove()` that logs errors

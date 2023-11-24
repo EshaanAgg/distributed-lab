@@ -74,4 +74,16 @@ sort -n -k2 tmp/mrtmp.wcseq | tail -10`
 ./test/test-wc.sh`
 ```
 
+#### Task 3
+
+```bash
+go test -run TestBasic
+```
+
+#### Task 4
+
+```bash
+go test -run Failure
+```
+
 ## Resources

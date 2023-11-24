@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-// Shutdown is an RPC method that shuts down the Master's RPC server.
+// Shutdown is an RPC method that shuts down the Master's RPC server
 func (mr *Master) Shutdown(_, _ *struct{}) error {
 	debug("Shutdown: registration server\n")
 	close(mr.shutdown)
