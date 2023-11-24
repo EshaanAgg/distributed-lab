@@ -39,16 +39,28 @@ This repository contains my solutions to the infamous [`MIT 6.824 2017 Course`](
     <tr>
     <td>3</td>
     <td>Distributing MapReduce tasks</td>
-    <td>⏳</td>
+    <td>✅</td>
   </tr>
   </tr>
     <td>4</td>
     <td>Handling worker failures</td>
-    <td>🔴</td>
+    <td>✅</td>
   </tr>
   </tr>
     <td>5</td>
-    <td>Inverted index generation (Optional)</td>
+    <td>Inverted Index Generation (Optional)</td>
+    <td>⏳</td>
+  </tr>
+
+  <tr>
+  <th colspan="3">
+        <a href="">
+            Lab 2
+            <br>
+            <br>
+            Raft 
+        </a>
+    </th>
     <td>🔴</td>
   </tr>
 </table>
