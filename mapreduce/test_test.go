@@ -182,6 +182,7 @@ func TestBasic(t *testing.T) {
 			MapFunc, ReduceFunc, -1)
 	}
 	mr.Wait()
+
 	check(t, mr.files)
 	checkWorker(t, mr.stats)
 	cleanup(mr)
@@ -195,6 +196,7 @@ func TestOneFailure(t *testing.T) {
 	go RunWorker(mr.address, port("worker"+strconv.Itoa(1)),
 		MapFunc, ReduceFunc, -1)
 	mr.Wait()
+
 	check(t, mr.files)
 	checkWorker(t, mr.stats)
 	cleanup(mr)

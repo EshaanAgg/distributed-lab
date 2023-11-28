@@ -13,13 +13,15 @@ import (
 type Worker struct {
 	sync.Mutex
 
-	name       string
-	Map        func(string, string) []KeyValue
-	Reduce     func(string, []string) string
+	name   string
+	Map    func(string, string) []KeyValue
+	Reduce func(string, []string) string
+
 	nRPC       int // Quit after this many RPCs; Protected by mutex
 	nTasks     int // Total tasks executed; Protected by mutex
 	concurrent int // Number of parallel DoTasks in this worker; mutex
-	l          net.Listener
+
+	l net.Listener
 }
 
 // Called by the master when a new task is being scheduled on this worker
@@ -34,8 +36,7 @@ func (wk *Worker) DoTask(arg *DoTaskArgs, _ *struct{}) error {
 	wk.Unlock()
 
 	if nc > 1 {
-		// schedule() should never issue more than one RPC at a
-		// time to a given worker.
+		// schedule() should never issue more than one RPC at a time to a given worker.
 		log.Fatal("Worker.DoTask: more than one DoTask sent concurrently to a single worker\n")
 	}
 
@@ -55,42 +56,48 @@ func (wk *Worker) DoTask(arg *DoTaskArgs, _ *struct{}) error {
 }
 
 // Shutdown is called by the master when all work has been completed.
-// We should respond with the number of tasks we have processed.
+// Responds with the number of tasks processed by it
 func (wk *Worker) Shutdown(_ *struct{}, res *ShutdownReply) error {
 	debug("Shutdown %s\n", wk.name)
+
 	wk.Lock()
 	defer wk.Unlock()
+
 	res.NTasks = wk.nTasks
 	wk.nRPC = 1
+
 	return nil
 }
 
-// Tell the master we exist and ready to work
+// Tell the master that the worked is ready to do work
 func (wk *Worker) register(master string) {
 	args := new(RegisterArgs)
 	args.Worker = wk.name
+
 	ok := call(master, "Master.Register", args, new(struct{}))
 	if !ok {
 		fmt.Printf("Register: RPC %s register error\n", master)
 	}
 }
 
-// RunWorker sets up a connection with the master, registers its address, and
-// waits for tasks to be scheduled.
+// Sets up a connection with the master, registers its address, and waits for tasks to be scheduled
 func RunWorker(MasterAddress string, me string,
 	MapFunc func(string, string) []KeyValue,
 	ReduceFunc func(string, []string) string,
 	nRPC int,
 ) {
 	debug("RunWorker %s\n", me)
+
 	wk := new(Worker)
 	wk.name = me
 	wk.Map = MapFunc
 	wk.Reduce = ReduceFunc
 	wk.nRPC = nRPC
+
 	rpcs := rpc.NewServer()
 	rpcs.Register(wk)
-	os.Remove(me) // only needed for "unix"
+
+	os.Remove(me) // Only needed for "unix"
 	l, e := net.Listen("unix", me)
 	if e != nil {
 		log.Fatal("RunWorker: worker ", me, " error: ", e)
@@ -98,13 +105,13 @@ func RunWorker(MasterAddress string, me string,
 	wk.l = l
 	wk.register(MasterAddress)
 
-	// DON'T MODIFY CODE BELOW
 	for {
 		wk.Lock()
 		if wk.nRPC == 0 {
 			wk.Unlock()
 			break
 		}
+
 		wk.Unlock()
 		conn, err := wk.l.Accept()
 		if err == nil {
@@ -116,6 +123,7 @@ func RunWorker(MasterAddress string, me string,
 			break
 		}
 	}
+
 	wk.l.Close()
 	debug("RunWorker %s exit\n", me)
 }

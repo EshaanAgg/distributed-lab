@@ -13,9 +13,9 @@ type Master struct {
 	address     string
 	doneChannel chan bool
 
-	// protected by the mutex
+	// Protected by the mutex
 	newCond *sync.Cond // signals when Register() adds to workers[]
-	workers []string   // each worker's UNIX-domain socket name -- its RPC address
+	workers []string   // Each worker's UNIX-domain socket name -- it's RPC address
 
 	// Per-task information
 	jobName string   // Name of currently executing job
@@ -27,27 +27,29 @@ type Master struct {
 	stats    []int
 }
 
-// Register is an RPC method that is called by workers after they have started
-// up to report that they are ready to receive tasks.
+// It is an RPC method that is called by workers after they have started
+// to report that they are ready to receive tasks
 func (mr *Master) Register(args *RegisterArgs, _ *struct{}) error {
 	mr.Lock()
 	defer mr.Unlock()
 	debug("Register: worker %s\n", args.Worker)
 	mr.workers = append(mr.workers, args.Worker)
 
-	// tell forwardRegistrations() that there's a new workers[] entry.
+	// Tell forwardRegistrations() that there's a new workers[] entry.
 	mr.newCond.Broadcast()
 
 	return nil
 }
 
-// newMaster initializes a new Map/Reduce Master
+// Initializes a new Map/Reduce Master with the given address
 func newMaster(master string) (mr *Master) {
 	mr = new(Master)
+
 	mr.address = master
 	mr.shutdown = make(chan struct{})
 	mr.newCond = sync.NewCond(mr)
 	mr.doneChannel = make(chan bool)
+
 	return
 }
 
@@ -57,6 +59,7 @@ func Sequential(jobName string, files []string, nreduce int,
 	reduceF func(string, []string) string,
 ) (mr *Master) {
 	mr = newMaster("master")
+
 	go mr.run(jobName, files, nreduce, func(phase jobPhase) {
 		switch phase {
 		case mapPhase:
@@ -71,35 +74,34 @@ func Sequential(jobName string, files []string, nreduce int,
 	}, func() {
 		mr.stats = []int{len(files) + nreduce}
 	})
+
 	return
 }
 
-// helper function that sends information about all existing
-// and newly registered workers to channel ch. schedule()
-// reads ch to learn about workers.
+// Helper function that sends information about all existing and newly registered workers
+// to channel ch. schedule() reads ch to learn about workers
 func (mr *Master) forwardRegistrations(ch chan string) {
 	i := 0
 	for {
 		mr.Lock()
 		if len(mr.workers) > i {
-			// there's a worker that we haven't told schedule() about.
+			// There is a worker that we haven't told schedule() about
 			w := mr.workers[i]
-			go func() { ch <- w }() // send without holding the lock.
+			go func() { ch <- w }()
 			i = i + 1
 		} else {
-			// wait for Register() to add an entry to workers[]
-			// in response to an RPC from a new worker.
+			// Wait for Register() to add an entry to workers[] in response to an RPC from a new worker
 			mr.newCond.Wait()
 		}
 		mr.Unlock()
 	}
 }
 
-// Distributed schedules map and reduce tasks on workers that register with the
-// master over RPC.
+// Distributed schedules map and reduce tasks on workers that register with the master over RPC
 func Distributed(jobName string, files []string, nreduce int, master string) (mr *Master) {
 	mr = newMaster(master)
 	mr.startRPCServer()
+
 	go mr.run(jobName, files, nreduce,
 		func(phase jobPhase) {
 			ch := make(chan string)
@@ -110,10 +112,11 @@ func Distributed(jobName string, files []string, nreduce int, master string) (mr
 			mr.stats = mr.killWorkers()
 			mr.stopRPCServer()
 		})
+
 	return
 }
 
-// run executes a mapreduce job on the given number of mappers and reducers.
+// It executes a mapreduce job on the given number of mappers and reducers.
 //
 // First, it divides up the input file among the given number of mappers, and
 // schedules each task on workers as they become available. Each map task bins
@@ -144,21 +147,23 @@ func (mr *Master) run(jobName string, files []string, nreduce int,
 	mr.doneChannel <- true
 }
 
-// Wait blocks until the currently scheduled work has completed.
+// Blocks the execution thread until the currently scheduled work has completed.
 // This happens when all tasks have scheduled and completed, the final output
-// have been computed, and all workers have been shut down.
+// has been computed, and all workers have been shut down.
 func (mr *Master) Wait() {
 	<-mr.doneChannel
 }
 
-// killWorkers cleans up all workers by sending each one a Shutdown RPC.
+// Cleans up all workers by sending each one a Shutdown RPC.
 // It also collects and returns the number of tasks each worker has performed.
 func (mr *Master) killWorkers() []int {
 	mr.Lock()
 	defer mr.Unlock()
+
 	ntasks := make([]int, 0, len(mr.workers))
 	for _, w := range mr.workers {
-		debug("Master: shutdown worker %s\n", w)
+		debug("Master: Shutdown worker %s\n", w)
+
 		var reply ShutdownReply
 		ok := call(w, "Worker.Shutdown", new(struct{}), &reply)
 		if !ok {
@@ -167,5 +172,6 @@ func (mr *Master) killWorkers() []int {
 			ntasks = append(ntasks, reply.NTasks)
 		}
 	}
+
 	return ntasks
 }
