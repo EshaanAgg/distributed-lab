@@ -1,13 +1,5 @@
 package raft
 
-//
-// support for Raft tester.
-//
-// we will use the original config.go to test your code for grading.
-// so, while you can modify this code to help you debug, please
-// test with the original before submitting.
-//
-
 import (
 	"log"
 	"runtime"
@@ -169,7 +161,7 @@ func (cfg *config) start1(i int) {
 				cfg.logs[i][m.Index] = v
 				cfg.mu.Unlock()
 
-				if m.Index > 1 && prevok == false {
+				if m.Index > 1 && !prevok {
 					err_msg = fmt.Sprintf("server %v apply out of order %v", i, m.Index)
 				}
 			} else {
